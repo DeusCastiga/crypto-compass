@@ -23,6 +23,7 @@ export default function Dashboard() {
 
   const isLoading = coinsLoading || globalLoading;
 
+  // Calculate stats
   const stats = useMemo(() => {
     if (!coinsData || coinsData.length === 0) {
       return {
@@ -55,6 +56,7 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen pt-32 md:pt-24 pb-12">
+      {/* Hero */}
       <div className="gradient-dashboard py-16 mb-8 -mt-24 pt-32 md:pt-40">
         <div className="container mx-auto px-4">
           <h1 className="text-4xl md:text-5xl font-bold text-primary-foreground mb-4">
@@ -67,6 +69,7 @@ export default function Dashboard() {
       </div>
 
       <div className="container mx-auto px-4">
+        {/* Loading */}
         {isLoading && (
           <div className="flex items-center justify-center py-20">
             <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -75,6 +78,7 @@ export default function Dashboard() {
 
         {!isLoading && (
           <>
+            {/* Stats Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
               <StatCard
                 title="Watchlist Items"
@@ -102,6 +106,7 @@ export default function Dashboard() {
               />
             </div>
 
+            {/* Second Row Stats */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
               {stats.highestMarketCap && (
                 <StatCard
@@ -126,11 +131,13 @@ export default function Dashboard() {
               />
             </div>
 
+            {/* Charts Row */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
               <AlertDistributionChart alerts={alerts} />
               <AlertPieChart alerts={alerts} />
             </div>
 
+            {/* Watchlist Summary */}
             <div className="glass-card">
               <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
                 <PieChart className="w-5 h-5" />

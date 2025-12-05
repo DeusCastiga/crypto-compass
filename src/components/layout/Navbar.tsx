@@ -61,7 +61,7 @@ export function Navbar() {
 
           {/* Controls */}
           <div className="flex items-center gap-2">
-            <Select value={currency} onValueChange={setCurrency}>
+            <Select value={currency} onValueChange={(v) => setCurrency(v as 'usd' | 'eur' | 'brl')}>
               <SelectTrigger className="w-20 glass border-0">
                 <SelectValue />
               </SelectTrigger>

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Edit2, Save, X, Tag } from 'lucide-react';
-import { useWatchlist } from '@/contexts/WatchlistContext';
+import { WatchlistItem, useWatchlist } from '@/contexts/WatchlistContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -12,7 +12,11 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 
-export function TagsNotesEditor({ item }) {
+interface TagsNotesEditorProps {
+  item: WatchlistItem;
+}
+
+export function TagsNotesEditor({ item }: TagsNotesEditorProps) {
   const { updateWatchlistItem } = useWatchlist();
   const [open, setOpen] = useState(false);
   const [tags, setTags] = useState(item.tags.join(', '));

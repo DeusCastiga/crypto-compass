@@ -1,9 +1,16 @@
 import { X } from 'lucide-react';
+import { CoinMarket } from '@/hooks/useCoinGecko';
 import { useApp } from '@/contexts/AppContext';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
-export function CompareBlock({ coins, onRemove, onClear }) {
+interface CompareBlockProps {
+  coins: CoinMarket[];
+  onRemove: (coinId: string) => void;
+  onClear: () => void;
+}
+
+export function CompareBlock({ coins, onRemove, onClear }: CompareBlockProps) {
   const { formatPrice, formatNumber, formatPercent } = useApp();
 
   if (coins.length === 0) return null;

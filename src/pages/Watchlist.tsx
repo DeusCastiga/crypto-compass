@@ -3,8 +3,8 @@ import {
   RefreshCw, Trash2, Clock, Bell, CheckCircle, History, 
   ArrowUpDown, Tag, Loader2, AlertTriangle 
 } from 'lucide-react';
-import { useWatchlist } from '@/contexts/WatchlistContext';
-import { useCoinsById } from '@/hooks/useCoinGecko';
+import { useWatchlist, WatchlistItem, Alert } from '@/contexts/WatchlistContext';
+import { useCoinsById, CoinMarket } from '@/hooks/useCoinGecko';
 import { useApp } from '@/contexts/AppContext';
 import { CoinCard } from '@/components/market/CoinCard';
 import { CoinDetailModal } from '@/components/market/CoinDetailModal';
@@ -24,6 +24,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 
+type SortKey = 'name' | 'market_cap' | 'price' | 'change_24h';
+
 export default function Watchlist() {
   const { 
     watchlist, alerts, alertHistory, 
@@ -32,12 +34,13 @@ export default function Watchlist() {
   } = useWatchlist();
   const { formatPrice } = useApp();
 
-  const [selectedCoin, setSelectedCoin] = useState(null);
-  const [sortBy, setSortBy] = useState('name');
+  const [selectedCoin, setSelectedCoin] = useState<CoinMarket | null>(null);
+  const [sortBy, setSortBy] = useState<SortKey>('name');
 
   const coinIds = watchlist.map(item => item.coinId);
   const { data: coinsData, isLoading, refetch, isFetching } = useCoinsById(coinIds);
 
+  // Alert polling - check every 60s
   useEffect(() => {
     if (!coinsData || coinsData.length === 0) return;
 
@@ -82,12 +85,14 @@ export default function Watchlist() {
     return () => clearInterval(interval);
   }, [alerts, coinsData, triggerAlert, refetch]);
 
+  // Request notification permission
   useEffect(() => {
     if ('Notification' in window && Notification.permission === 'default') {
       Notification.requestPermission();
     }
   }, []);
 
+  // Merge watchlist items with live data
   const watchlistWithData = useMemo(() => {
     if (!coinsData) return [];
     
@@ -97,6 +102,7 @@ export default function Watchlist() {
     }).filter(item => item.coinData);
   }, [watchlist, coinsData]);
 
+  // Sort
   const sortedWatchlist = useMemo(() => {
     return [...watchlistWithData].sort((a, b) => {
       switch (sortBy) {
@@ -123,12 +129,14 @@ export default function Watchlist() {
 
   return (
     <div className="min-h-screen pt-32 md:pt-24 pb-12">
+      {/* Hero */}
       <div className="gradient-watchlist py-16 mb-8 -mt-24 pt-32 md:pt-40">
         <div className="container mx-auto px-4">
           <h1 className="text-4xl md:text-5xl font-bold text-secondary-foreground mb-4">
             Watchlist & Alerts
           </h1>
           
+          {/* Quick Stats */}
           <div className="flex flex-wrap gap-4 mt-6">
             <div className="glass px-4 py-2 rounded-xl flex items-center gap-2">
               <CheckCircle className="w-5 h-5 text-secondary-foreground" />
@@ -172,12 +180,14 @@ export default function Watchlist() {
 
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
+            {/* Sort Controls */}
             <div className="glass-card flex items-center justify-between">
               <h2 className="font-semibold text-foreground">
                 My Watchlist ({watchlist.length})
               </h2>
-              <Select value={sortBy} onValueChange={setSortBy}>
+              <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortKey)}>
                 <SelectTrigger className="w-40 glass border-0">
                   <ArrowUpDown className="w-4 h-4 mr-2" />
                   <SelectValue />
@@ -191,12 +201,14 @@ export default function Watchlist() {
               </Select>
             </div>
 
+            {/* Loading */}
             {isLoading && coinIds.length > 0 && (
               <div className="flex items-center justify-center py-12">
                 <Loader2 className="w-8 h-8 animate-spin text-secondary" />
               </div>
             )}
 
+            {/* Empty State */}
             {watchlist.length === 0 && (
               <div className="glass-card text-center py-12">
                 <AlertTriangle className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
@@ -205,12 +217,13 @@ export default function Watchlist() {
               </div>
             )}
 
+            {/* Watchlist Grid */}
             {!isLoading && sortedWatchlist.length > 0 && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {sortedWatchlist.map((item) => (
                   <CoinCard
                     key={item.coinId}
-                    coin={item.coinData}
+                    coin={item.coinData!}
                     onViewDetails={setSelectedCoin}
                     tags={item.tags}
                     note={item.note}
@@ -220,6 +233,7 @@ export default function Watchlist() {
               </div>
             )}
 
+            {/* Tags & Notes Section */}
             {watchlist.length > 0 && (
               <div className="glass-card">
                 <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
@@ -235,7 +249,9 @@ export default function Watchlist() {
             )}
           </div>
 
+          {/* Sidebar - Alerts */}
           <div className="space-y-6">
+            {/* Create Alert */}
             <div className="glass-card">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-semibold text-foreground flex items-center gap-2">
@@ -247,6 +263,7 @@ export default function Watchlist() {
               <AlertList alerts={alerts} />
             </div>
 
+            {/* Alert History */}
             <div className="glass-card">
               <h3 className="font-semibold text-foreground mb-4 flex items-center gap-2">
                 <History className="w-5 h-5" />
@@ -283,6 +300,7 @@ export default function Watchlist() {
         </div>
       </div>
 
+      {/* Detail Modal */}
       <CoinDetailModal
         coin={selectedCoin}
         open={!!selectedCoin}

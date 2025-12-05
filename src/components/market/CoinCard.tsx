@@ -1,10 +1,21 @@
 import { Pin, PinOff, Plus, Eye, Check, GitCompare } from 'lucide-react';
+import { CoinMarket } from '@/hooks/useCoinGecko';
 import { useApp } from '@/contexts/AppContext';
 import { useWatchlist } from '@/contexts/WatchlistContext';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Sparkline } from '@/components/ui/Sparkline';
 import { cn } from '@/lib/utils';
+
+interface CoinCardProps {
+  coin: CoinMarket;
+  onViewDetails: (coin: CoinMarket) => void;
+  onCompare?: (coin: CoinMarket) => void;
+  isComparing?: boolean;
+  tags?: string[];
+  note?: string;
+  showActions?: boolean;
+}
 
 export function CoinCard({ 
   coin, 
@@ -14,7 +25,7 @@ export function CoinCard({
   tags,
   note,
   showActions = true 
-}) {
+}: CoinCardProps) {
   const { formatPrice, formatNumber, formatPercent } = useApp();
   const { addToWatchlist, isInWatchlist, isPinned, togglePin } = useWatchlist();
 
