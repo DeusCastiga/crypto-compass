@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import { Search, Filter, RefreshCw, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
-import { useMarketData, CoinMarket } from '@/hooks/useCoinGecko';
+import { useMarketData } from '@/hooks/useCoinGecko';
 import { useWatchlist } from '@/contexts/WatchlistContext';
 import { CoinCard } from '@/components/market/CoinCard';
 import { CoinDetailModal } from '@/components/market/CoinDetailModal';
@@ -11,26 +11,22 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 
-type FilterType = 'all' | 'top10' | 'gainers' | 'losers' | 'pinned';
-
 export default function Market() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
-  const [filter, setFilter] = useState<FilterType>('all');
+  const [filter, setFilter] = useState('all');
   const [autoLoad, setAutoLoad] = useState(false);
-  const [selectedCoin, setSelectedCoin] = useState<CoinMarket | null>(null);
-  const [compareCoins, setCompareCoins] = useState<CoinMarket[]>([]);
+  const [selectedCoin, setSelectedCoin] = useState(null);
+  const [compareCoins, setCompareCoins] = useState([]);
 
   const { data: coins, isLoading, isFetching, refetch } = useMarketData(page, 50);
   const { pinnedCoins } = useWatchlist();
 
-  // Filter and search
   const filteredCoins = useMemo(() => {
     if (!coins) return [];
     
     let result = [...coins];
 
-    // Search filter
     if (search) {
       const searchLower = search.toLowerCase();
       result = result.filter(coin => 
@@ -39,7 +35,6 @@ export default function Market() {
       );
     }
 
-    // Category filter
     switch (filter) {
       case 'top10':
         result = result.filter(coin => coin.market_cap_rank <= 10);
@@ -57,7 +52,6 @@ export default function Market() {
         break;
     }
 
-    // Always show pinned at top
     if (filter !== 'pinned') {
       const pinned = result.filter(coin => pinnedCoins.includes(coin.id));
       const notPinned = result.filter(coin => !pinnedCoins.includes(coin.id));
@@ -67,7 +61,7 @@ export default function Market() {
     return result.slice(0, 20);
   }, [coins, search, filter, pinnedCoins]);
 
-  const handleCompare = (coin: CoinMarket) => {
+  const handleCompare = (coin) => {
     if (compareCoins.find(c => c.id === coin.id)) {
       setCompareCoins(prev => prev.filter(c => c.id !== coin.id));
     } else if (compareCoins.length < 3) {
@@ -75,7 +69,7 @@ export default function Market() {
     }
   };
 
-  const filters: { key: FilterType; label: string }[] = [
+  const filters = [
     { key: 'all', label: 'All' },
     { key: 'top10', label: 'Top 10' },
     { key: 'gainers', label: 'Gainers 24h' },
@@ -85,7 +79,6 @@ export default function Market() {
 
   return (
     <div className="min-h-screen pt-32 md:pt-24 pb-12">
-      {/* Hero */}
       <div className="gradient-market py-16 mb-8 -mt-24 pt-32 md:pt-40">
         <div className="container mx-auto px-4 text-center">
           <h1 className="text-4xl md:text-5xl font-bold text-primary-foreground mb-4">
@@ -98,7 +91,6 @@ export default function Market() {
       </div>
 
       <div className="container mx-auto px-4">
-        {/* Search & Filters */}
         <div className="glass-card mb-6">
           <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
             <div className="relative w-full md:w-80">
@@ -168,21 +160,18 @@ export default function Market() {
           </div>
         </div>
 
-        {/* Compare Block */}
         <CompareBlock 
           coins={compareCoins} 
           onRemove={(id) => setCompareCoins(prev => prev.filter(c => c.id !== id))}
           onClear={() => setCompareCoins([])}
         />
 
-        {/* Loading */}
         {isLoading && (
           <div className="flex items-center justify-center py-20">
             <Loader2 className="w-8 h-8 animate-spin text-primary" />
           </div>
         )}
 
-        {/* Coins Grid */}
         {!isLoading && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {filteredCoins.map((coin) => (
@@ -197,7 +186,6 @@ export default function Market() {
           </div>
         )}
 
-        {/* Empty State */}
         {!isLoading && filteredCoins.length === 0 && (
           <div className="glass-card text-center py-12">
             <Filter className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
@@ -206,7 +194,6 @@ export default function Market() {
         )}
       </div>
 
-      {/* Detail Modal */}
       <CoinDetailModal
         coin={selectedCoin}
         open={!!selectedCoin}

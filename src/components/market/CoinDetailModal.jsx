@@ -1,5 +1,5 @@
-import { X, TrendingUp, TrendingDown, DollarSign, BarChart3 } from 'lucide-react';
-import { CoinMarket, useCoinDetail } from '@/hooks/useCoinGecko';
+import { TrendingUp, TrendingDown, DollarSign, BarChart3 } from 'lucide-react';
+import { useCoinDetail } from '@/hooks/useCoinGecko';
 import { useApp } from '@/contexts/AppContext';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -12,14 +12,8 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 
-interface CoinDetailModalProps {
-  coin: CoinMarket | null;
-  open: boolean;
-  onClose: () => void;
-}
-
-export function CoinDetailModal({ coin, open, onClose }: CoinDetailModalProps) {
-  const { formatPrice, formatNumber, formatPercent, currency } = useApp();
+export function CoinDetailModal({ coin, open, onClose }) {
+  const { formatPrice, formatNumber, formatPercent } = useApp();
   const { data: detail, isLoading } = useCoinDetail(coin?.id ?? null);
 
   if (!coin) return null;

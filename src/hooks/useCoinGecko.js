@@ -2,53 +2,9 @@ import { useQuery } from '@tanstack/react-query';
 import { useApp } from '@/contexts/AppContext';
 
 const BASE_URL = 'https://api.coingecko.com/api/v3';
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+const CACHE_DURATION = 5 * 60 * 1000;
 
-export interface CoinMarket {
-  id: string;
-  symbol: string;
-  name: string;
-  image: string;
-  current_price: number;
-  market_cap: number;
-  market_cap_rank: number;
-  total_volume: number;
-  high_24h: number;
-  low_24h: number;
-  price_change_24h: number;
-  price_change_percentage_24h: number;
-  price_change_percentage_7d_in_currency?: number;
-  sparkline_in_7d?: { price: number[] };
-}
-
-export interface CoinDetail {
-  id: string;
-  symbol: string;
-  name: string;
-  image: { large: string; small: string; thumb: string };
-  market_data: {
-    current_price: Record<string, number>;
-    market_cap: Record<string, number>;
-    total_volume: Record<string, number>;
-    high_24h: Record<string, number>;
-    low_24h: Record<string, number>;
-    price_change_24h: number;
-    price_change_percentage_24h: number;
-    price_change_percentage_7d: number;
-  };
-  description: { en: string };
-}
-
-export interface GlobalData {
-  data: {
-    total_market_cap: Record<string, number>;
-    total_volume: Record<string, number>;
-    market_cap_percentage: Record<string, number>;
-    market_cap_change_percentage_24h_usd: number;
-  };
-}
-
-async function fetchWithCache<T>(url: string, cacheKey: string): Promise<T> {
+async function fetchWithCache(url, cacheKey) {
   const cached = localStorage.getItem(cacheKey);
   if (cached) {
     const { data, timestamp } = JSON.parse(cached);
@@ -67,12 +23,12 @@ async function fetchWithCache<T>(url: string, cacheKey: string): Promise<T> {
   return data;
 }
 
-export function useMarketData(page: number = 1, perPage: number = 20) {
+export function useMarketData(page = 1, perPage = 20) {
   const { currency } = useApp();
   
   return useQuery({
     queryKey: ['market', currency, page, perPage],
-    queryFn: () => fetchWithCache<CoinMarket[]>(
+    queryFn: () => fetchWithCache(
       `${BASE_URL}/coins/markets?vs_currency=${currency}&order=market_cap_desc&per_page=${perPage}&page=${page}&sparkline=true&price_change_percentage=7d`,
       `market-${currency}-${page}-${perPage}`
     ),
@@ -81,10 +37,10 @@ export function useMarketData(page: number = 1, perPage: number = 20) {
   });
 }
 
-export function useCoinDetail(coinId: string | null) {
+export function useCoinDetail(coinId) {
   return useQuery({
     queryKey: ['coin', coinId],
-    queryFn: () => fetchWithCache<CoinDetail>(
+    queryFn: () => fetchWithCache(
       `${BASE_URL}/coins/${coinId}?localization=false&tickers=false&community_data=false&developer_data=false`,
       `coin-${coinId}`
     ),
@@ -96,7 +52,7 @@ export function useCoinDetail(coinId: string | null) {
 export function useGlobalData() {
   return useQuery({
     queryKey: ['global'],
-    queryFn: () => fetchWithCache<GlobalData>(
+    queryFn: () => fetchWithCache(
       `${BASE_URL}/global`,
       'global-data'
     ),
@@ -105,12 +61,12 @@ export function useGlobalData() {
   });
 }
 
-export function useCoinsById(ids: string[]) {
+export function useCoinsById(ids) {
   const { currency } = useApp();
   
   return useQuery({
     queryKey: ['coins-by-id', ids.join(','), currency],
-    queryFn: () => fetchWithCache<CoinMarket[]>(
+    queryFn: () => fetchWithCache(
       `${BASE_URL}/coins/markets?vs_currency=${currency}&ids=${ids.join(',')}&sparkline=true&price_change_percentage=7d`,
       `coins-${ids.join(',')}-${currency}`
     ),
@@ -120,7 +76,7 @@ export function useCoinsById(ids: string[]) {
   });
 }
 
-export function useSearchCoins(query: string) {
+export function useSearchCoins(query) {
   return useQuery({
     queryKey: ['search', query],
     queryFn: async () => {

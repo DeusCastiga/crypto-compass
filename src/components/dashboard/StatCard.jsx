@@ -1,16 +1,6 @@
-import { LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-interface StatCardProps {
-  title: string;
-  value: string | number;
-  subtitle?: string;
-  icon: LucideIcon;
-  trend?: 'up' | 'down' | 'neutral';
-  className?: string;
-}
-
-export function StatCard({ title, value, subtitle, icon: Icon, trend, className }: StatCardProps) {
+export function StatCard({ title, value, subtitle, icon: Icon, trend, className }) {
   return (
     <div className={cn("glass-card", className)}>
       <div className="flex items-start justify-between">

@@ -1,17 +1,13 @@
-import { Edit2, Trash2, Bell, BellOff } from 'lucide-react';
-import { Alert, useWatchlist } from '@/contexts/WatchlistContext';
+import { Trash2, Bell, BellOff } from 'lucide-react';
+import { useWatchlist } from '@/contexts/WatchlistContext';
 import { useApp } from '@/contexts/AppContext';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
-interface AlertListProps {
-  alerts: Alert[];
-}
-
-export function AlertList({ alerts }: AlertListProps) {
+export function AlertList({ alerts }) {
   const { deleteAlert } = useWatchlist();
-  const { formatPrice, formatPercent } = useApp();
+  const { formatPrice } = useApp();
 
   if (alerts.length === 0) {
     return (

@@ -1,10 +1,4 @@
-import { Alert } from '@/contexts/WatchlistContext';
-
-interface AlertPieChartProps {
-  alerts: Alert[];
-}
-
-export function AlertPieChart({ alerts }: AlertPieChartProps) {
+export function AlertPieChart({ alerts }) {
   const triggered = alerts.filter(a => a.triggered).length;
   const pending = alerts.length - triggered;
   const total = alerts.length;
@@ -19,9 +13,7 @@ export function AlertPieChart({ alerts }: AlertPieChartProps) {
   }
 
   const triggeredPercent = (triggered / total) * 100;
-  const pendingPercent = (pending / total) * 100;
 
-  // Conic gradient for pie chart
   const gradient = `conic-gradient(
     hsl(var(--success)) 0deg ${triggeredPercent * 3.6}deg,
     hsl(var(--primary)) ${triggeredPercent * 3.6}deg 360deg
