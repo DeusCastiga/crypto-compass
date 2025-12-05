@@ -1,66 +1,7 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { toast } from 'sonner';
 
-export interface WatchlistItem {
-  id: string;
-  coinId: string;
-  name: string;
-  symbol: string;
-  image: string;
-  addedAt: string;
-  tags: string[];
-  note: string;
-}
-
-export interface Alert {
-  id: string;
-  coinId: string;
-  coinName: string;
-  coinSymbol: string;
-  type: 'price' | 'percent';
-  direction: 'above' | 'below';
-  targetValue: number;
-  window: '24h' | '7d';
-  note: string;
-  createdAt: string;
-  triggered: boolean;
-  triggeredAt?: string;
-  triggeredPrice?: number;
-}
-
-export interface AlertHistory {
-  id: string;
-  alertId: string;
-  coinName: string;
-  coinSymbol: string;
-  type: 'price' | 'percent';
-  direction: 'above' | 'below';
-  targetValue: number;
-  triggeredAt: string;
-  triggeredPrice: number;
-}
-
-interface WatchlistContextType {
-  watchlist: WatchlistItem[];
-  alerts: Alert[];
-  alertHistory: AlertHistory[];
-  pinnedCoins: string[];
-  addToWatchlist: (coin: { id: string; name: string; symbol: string; image: string }) => void;
-  removeFromWatchlist: (coinId: string) => void;
-  isInWatchlist: (coinId: string) => boolean;
-  updateWatchlistItem: (coinId: string, updates: { tags?: string[]; note?: string }) => void;
-  createAlert: (alert: Omit<Alert, 'id' | 'createdAt' | 'triggered'>) => void;
-  deleteAlert: (alertId: string) => void;
-  updateAlert: (alertId: string, updates: Partial<Alert>) => void;
-  triggerAlert: (alertId: string, triggeredPrice: number) => void;
-  clearAlertHistory: () => void;
-  togglePin: (coinId: string) => void;
-  isPinned: (coinId: string) => boolean;
-  syncPrices: () => void;
-  lastSync: Date | null;
-}
-
-const WatchlistContext = createContext<WatchlistContextType | undefined>(undefined);
+const WatchlistContext = createContext(undefined);
 
 const STORAGE_KEYS = {
   watchlist: 'cryptowatch-watchlist',
@@ -69,30 +10,29 @@ const STORAGE_KEYS = {
   pinnedCoins: 'cryptowatch-pinned',
 };
 
-export function WatchlistProvider({ children }: { children: ReactNode }) {
-  const [watchlist, setWatchlist] = useState<WatchlistItem[]>(() => {
+export function WatchlistProvider({ children }) {
+  const [watchlist, setWatchlist] = useState(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.watchlist);
     return saved ? JSON.parse(saved) : [];
   });
 
-  const [alerts, setAlerts] = useState<Alert[]>(() => {
+  const [alerts, setAlerts] = useState(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.alerts);
     return saved ? JSON.parse(saved) : [];
   });
 
-  const [alertHistory, setAlertHistory] = useState<AlertHistory[]>(() => {
+  const [alertHistory, setAlertHistory] = useState(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.alertHistory);
     return saved ? JSON.parse(saved) : [];
   });
 
-  const [pinnedCoins, setPinnedCoins] = useState<string[]>(() => {
+  const [pinnedCoins, setPinnedCoins] = useState(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.pinnedCoins);
     return saved ? JSON.parse(saved) : [];
   });
 
-  const [lastSync, setLastSync] = useState<Date | null>(null);
+  const [lastSync, setLastSync] = useState(null);
 
-  // Save to localStorage
   useEffect(() => {
     localStorage.setItem(STORAGE_KEYS.watchlist, JSON.stringify(watchlist));
   }, [watchlist]);
@@ -109,13 +49,13 @@ export function WatchlistProvider({ children }: { children: ReactNode }) {
     localStorage.setItem(STORAGE_KEYS.pinnedCoins, JSON.stringify(pinnedCoins));
   }, [pinnedCoins]);
 
-  const addToWatchlist = useCallback((coin: { id: string; name: string; symbol: string; image: string }) => {
+  const addToWatchlist = useCallback((coin) => {
     if (watchlist.some(item => item.coinId === coin.id)) {
       toast.info(`${coin.name} is already in your watchlist`);
       return;
     }
     
-    const newItem: WatchlistItem = {
+    const newItem = {
       id: crypto.randomUUID(),
       coinId: coin.id,
       name: coin.name,
@@ -130,25 +70,25 @@ export function WatchlistProvider({ children }: { children: ReactNode }) {
     toast.success(`${coin.name} added to watchlist`);
   }, [watchlist]);
 
-  const removeFromWatchlist = useCallback((coinId: string) => {
+  const removeFromWatchlist = useCallback((coinId) => {
     setWatchlist(prev => prev.filter(item => item.coinId !== coinId));
     setAlerts(prev => prev.filter(alert => alert.coinId !== coinId));
     toast.success('Removed from watchlist');
   }, []);
 
-  const isInWatchlist = useCallback((coinId: string) => {
+  const isInWatchlist = useCallback((coinId) => {
     return watchlist.some(item => item.coinId === coinId);
   }, [watchlist]);
 
-  const updateWatchlistItem = useCallback((coinId: string, updates: { tags?: string[]; note?: string }) => {
+  const updateWatchlistItem = useCallback((coinId, updates) => {
     setWatchlist(prev => prev.map(item => 
       item.coinId === coinId ? { ...item, ...updates } : item
     ));
     toast.success('Watchlist item updated');
   }, []);
 
-  const createAlert = useCallback((alert: Omit<Alert, 'id' | 'createdAt' | 'triggered'>) => {
-    const newAlert: Alert = {
+  const createAlert = useCallback((alert) => {
+    const newAlert = {
       ...alert,
       id: crypto.randomUUID(),
       createdAt: new Date().toISOString(),
@@ -158,22 +98,22 @@ export function WatchlistProvider({ children }: { children: ReactNode }) {
     toast.success('Alert created');
   }, []);
 
-  const deleteAlert = useCallback((alertId: string) => {
+  const deleteAlert = useCallback((alertId) => {
     setAlerts(prev => prev.filter(alert => alert.id !== alertId));
     toast.success('Alert deleted');
   }, []);
 
-  const updateAlert = useCallback((alertId: string, updates: Partial<Alert>) => {
+  const updateAlert = useCallback((alertId, updates) => {
     setAlerts(prev => prev.map(alert => 
       alert.id === alertId ? { ...alert, ...updates } : alert
     ));
   }, []);
 
-  const triggerAlert = useCallback((alertId: string, triggeredPrice: number) => {
+  const triggerAlert = useCallback((alertId, triggeredPrice) => {
     const alert = alerts.find(a => a.id === alertId);
     if (!alert || alert.triggered) return;
 
-    const historyEntry: AlertHistory = {
+    const historyEntry = {
       id: crypto.randomUUID(),
       alertId,
       coinName: alert.coinName,
@@ -190,7 +130,6 @@ export function WatchlistProvider({ children }: { children: ReactNode }) {
       a.id === alertId ? { ...a, triggered: true, triggeredAt: new Date().toISOString(), triggeredPrice } : a
     ));
 
-    // Browser notification
     if (Notification.permission === 'granted') {
       new Notification(`CryptoWatch Alert: ${alert.coinName}`, {
         body: `${alert.direction === 'above' ? '↑' : '↓'} ${alert.type === 'price' ? `Price reached ${triggeredPrice}` : `Change of ${alert.targetValue}%`}`,
@@ -206,7 +145,7 @@ export function WatchlistProvider({ children }: { children: ReactNode }) {
     toast.success('Alert history cleared');
   }, []);
 
-  const togglePin = useCallback((coinId: string) => {
+  const togglePin = useCallback((coinId) => {
     setPinnedCoins(prev => 
       prev.includes(coinId) 
         ? prev.filter(id => id !== coinId)
@@ -214,7 +153,7 @@ export function WatchlistProvider({ children }: { children: ReactNode }) {
     );
   }, []);
 
-  const isPinned = useCallback((coinId: string) => {
+  const isPinned = useCallback((coinId) => {
     return pinnedCoins.includes(coinId);
   }, [pinnedCoins]);
 

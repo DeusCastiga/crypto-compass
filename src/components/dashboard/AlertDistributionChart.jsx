@@ -1,15 +1,8 @@
-import { Alert } from '@/contexts/WatchlistContext';
-
-interface AlertDistributionChartProps {
-  alerts: Alert[];
-}
-
-export function AlertDistributionChart({ alerts }: AlertDistributionChartProps) {
-  // Group alerts by coin
+export function AlertDistributionChart({ alerts }) {
   const distribution = alerts.reduce((acc, alert) => {
     acc[alert.coinSymbol] = (acc[alert.coinSymbol] || 0) + 1;
     return acc;
-  }, {} as Record<string, number>);
+  }, {});
 
   const entries = Object.entries(distribution).sort((a, b) => b[1] - a[1]);
   const maxCount = Math.max(...Object.values(distribution), 1);

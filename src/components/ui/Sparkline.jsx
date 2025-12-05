@@ -1,13 +1,6 @@
 import { useMemo } from 'react';
 
-interface SparklineProps {
-  data: number[];
-  width?: number;
-  height?: number;
-  className?: string;
-}
-
-export function Sparkline({ data, width = 100, height = 32, className }: SparklineProps) {
+export function Sparkline({ data, width = 100, height = 32, className }) {
   const path = useMemo(() => {
     if (!data || data.length < 2) return '';
     

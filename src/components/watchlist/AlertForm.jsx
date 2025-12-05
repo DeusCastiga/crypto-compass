@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Plus } from 'lucide-react';
-import { useWatchlist, WatchlistItem } from '@/contexts/WatchlistContext';
+import { useWatchlist } from '@/contexts/WatchlistContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -20,25 +20,21 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 
-interface AlertFormProps {
-  watchlistItems: WatchlistItem[];
-}
-
-export function AlertForm({ watchlistItems }: AlertFormProps) {
+export function AlertForm({ watchlistItems }) {
   const { createAlert } = useWatchlist();
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
     coinId: '',
-    type: 'price' as 'price' | 'percent',
-    direction: 'above' as 'above' | 'below',
+    type: 'price',
+    direction: 'above',
     targetValue: '',
-    window: '24h' as '24h' | '7d',
+    window: '24h',
     note: '',
   });
 
   const selectedCoin = watchlistItems.find(item => item.coinId === formData.coinId);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     if (!selectedCoin || !formData.targetValue) return;
 
@@ -99,7 +95,7 @@ export function AlertForm({ watchlistItems }: AlertFormProps) {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label>Alert Type</Label>
-              <Select value={formData.type} onValueChange={(v) => setFormData(prev => ({ ...prev, type: v as 'price' | 'percent' }))}>
+              <Select value={formData.type} onValueChange={(v) => setFormData(prev => ({ ...prev, type: v }))}>
                 <SelectTrigger className="glass border-0">
                   <SelectValue />
                 </SelectTrigger>
@@ -112,7 +108,7 @@ export function AlertForm({ watchlistItems }: AlertFormProps) {
 
             <div className="space-y-2">
               <Label>Direction</Label>
-              <Select value={formData.direction} onValueChange={(v) => setFormData(prev => ({ ...prev, direction: v as 'above' | 'below' }))}>
+              <Select value={formData.direction} onValueChange={(v) => setFormData(prev => ({ ...prev, direction: v }))}>
                 <SelectTrigger className="glass border-0">
                   <SelectValue />
                 </SelectTrigger>
@@ -139,7 +135,7 @@ export function AlertForm({ watchlistItems }: AlertFormProps) {
 
             <div className="space-y-2">
               <Label>Time Window</Label>
-              <Select value={formData.window} onValueChange={(v) => setFormData(prev => ({ ...prev, window: v as '24h' | '7d' }))}>
+              <Select value={formData.window} onValueChange={(v) => setFormData(prev => ({ ...prev, window: v }))}>
                 <SelectTrigger className="glass border-0">
                   <SelectValue />
                 </SelectTrigger>

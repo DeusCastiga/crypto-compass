@@ -1,41 +1,28 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 
-type Currency = 'usd' | 'eur' | 'brl';
-type Theme = 'light' | 'dark';
-
-interface AppContextType {
-  currency: Currency;
-  setCurrency: (currency: Currency) => void;
-  theme: Theme;
-  toggleTheme: () => void;
-  formatPrice: (price: number) => string;
-  formatNumber: (num: number) => string;
-  formatPercent: (percent: number) => string;
-}
-
-const currencySymbols: Record<Currency, string> = {
+const currencySymbols = {
   usd: '$',
   eur: '€',
   brl: 'R$',
 };
 
-const currencyLocales: Record<Currency, string> = {
+const currencyLocales = {
   usd: 'en-US',
   eur: 'de-DE',
   brl: 'pt-BR',
 };
 
-const AppContext = createContext<AppContextType | undefined>(undefined);
+const AppContext = createContext(undefined);
 
-export function AppProvider({ children }: { children: ReactNode }) {
-  const [currency, setCurrency] = useState<Currency>(() => {
+export function AppProvider({ children }) {
+  const [currency, setCurrency] = useState(() => {
     const saved = localStorage.getItem('cryptowatch-currency');
-    return (saved as Currency) || 'usd';
+    return saved || 'usd';
   });
 
-  const [theme, setTheme] = useState<Theme>(() => {
+  const [theme, setTheme] = useState(() => {
     const saved = localStorage.getItem('cryptowatch-theme');
-    if (saved) return saved as Theme;
+    if (saved) return saved;
     return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   });
 
@@ -50,7 +37,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const toggleTheme = () => setTheme(prev => prev === 'light' ? 'dark' : 'light');
 
-  const formatPrice = (price: number) => {
+  const formatPrice = (price) => {
     return new Intl.NumberFormat(currencyLocales[currency], {
       style: 'currency',
       currency: currency.toUpperCase(),
@@ -59,7 +46,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }).format(price);
   };
 
-  const formatNumber = (num: number) => {
+  const formatNumber = (num) => {
     if (num >= 1e12) return `${(num / 1e12).toFixed(2)}T`;
     if (num >= 1e9) return `${(num / 1e9).toFixed(2)}B`;
     if (num >= 1e6) return `${(num / 1e6).toFixed(2)}M`;
@@ -67,7 +54,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return num.toFixed(2);
   };
 
-  const formatPercent = (percent: number) => {
+  const formatPercent = (percent) => {
     return `${percent >= 0 ? '+' : ''}${percent.toFixed(2)}%`;
   };
 
